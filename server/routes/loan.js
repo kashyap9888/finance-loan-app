@@ -56,72 +56,32 @@ const verifyToken = (req, res, next) => {
 };
 
 // Apply for a loan
-router.post('/apply', verifyToken, upload.fields([
-  { name: 'salarySlips', maxCount: 3 },
-  { name: 'livePhoto', maxCount: 1 }
-]), async (req, res) => {
+router.post('/apply', verifyToken, async (req, res) => {
   try {
-    const { pan, aadhaar, bankDetails } = req.body;
+    const { amount, purpose, duration, panCard, aadhaar, bankAccount, ifsc } = req.body;
     const userId = req.user.userId;
     
     // Validate input
-    if (!pan || !aadhaar || !bankDetails) {
+    if (!amount || !purpose || !duration || !panCard || !aadhaar || !bankAccount || !ifsc) {
       return res.status(400).json({ success: false, message: 'All fields are required' });
     }
     
-    // Validate PAN (10 characters)
-    if (!/^[A-Z0-9]{10}$/.test(pan)) {
-      return res.status(400).json({ success: false, message: 'Invalid PAN format' });
-    }
+    // For simplicity in this demo, we'll skip file uploads and some validations
     
-    // Validate Aadhaar (12 digits)
-    if (!/^\d{12}$/.test(aadhaar)) {
-      return res.status(400).json({ success: false, message: 'Aadhaar must be 12 digits' });
-    }
-    
-    // Check if required files are uploaded
-    if (!req.files.salarySlips || req.files.salarySlips.length < 3) {
-      return res.status(400).json({ success: false, message: 'Please upload 3 salary slips' });
-    }
-    
-    if (!req.files.livePhoto || req.files.livePhoto.length === 0) {
-      return res.status(400).json({ success: false, message: 'Live photo is required' });
-    }
-    
-    // Parse bank details if it's a string
-    let parsedBankDetails;
-    try {
-      parsedBankDetails = typeof bankDetails === 'string' ? JSON.parse(bankDetails) : bankDetails;
-    } catch (error) {
-      return res.status(400).json({ success: false, message: 'Invalid bank details format' });
-    }
-    
-    // Validate bank details
-    if (!parsedBankDetails.accountNumber || !parsedBankDetails.ifsc || !parsedBankDetails.bankName) {
-      return res.status(400).json({ success: false, message: 'Complete bank details are required' });
-    }
-    
-    // Get file paths
-    const documents = req.files.salarySlips.map(file => '/uploads/' + file.filename);
-    const livePhoto = '/uploads/' + req.files.livePhoto[0].filename;
-    
-    // Update user with live photo and bank details
-    await User.findByIdAndUpdate(userId, {
-      livePhoto,
-      bankDetails: parsedBankDetails
-    });
-    
-    // Calculate due date (7 days from now)
+    // Calculate due date based on duration (in months)
     const dueDate = new Date();
-    dueDate.setDate(dueDate.getDate() + 7);
+    dueDate.setMonth(dueDate.getMonth() + parseInt(duration));
     
     // Create new loan application
     const loan = new Loan({
       userId,
-      amount: 1000,
-      documents,
-      pan,
+      amount: parseFloat(amount),
+      purpose,
+      duration: parseInt(duration),
+      panCard,
       aadhaar,
+      bankAccount,
+      ifsc,
       status: 'Applied',
       dueDate
     });

@@ -14,6 +14,12 @@ const Loan = require('./server/models/Loan');
 
 dotenv.config();
 
+// Set JWT_SECRET if not already set
+if (!process.env.JWT_SECRET) {
+  process.env.JWT_SECRET = 'finance-loan-app-secret-key';
+  console.log('JWT_SECRET not found in .env, using default secret key');
+}
+
 async function startServer() {
   // Create an in-memory MongoDB server
   const mongoServer = await MongoMemoryServer.create();
@@ -30,21 +36,18 @@ async function startServer() {
   
   // Create test users and loans
   const testUser = new User({
-    name: 'John Doe',
+    fullName: 'John Doe',
     mobile: '9876543210',
     city: 'Mumbai',
     permissions: {
       location: true,
       contacts: true
     },
-    location: {
-      lat: 12.9716,
-      lng: 77.5946
+    locationData: {
+      latitude: 12.9716,
+      longitude: 77.5946,
+      timestamp: new Date()
     },
-    contacts: [
-      { name: 'Contact 1', phone: '9876543210' },
-      { name: 'Contact 2', phone: '8765432109' }
-    ],
     bankDetails: {
       accountNumber: '1234567890',
       ifsc: 'ABCD0001234',
@@ -71,21 +74,18 @@ async function startServer() {
   
   // Create a second test user
   const testUser2 = new User({
-    name: 'Jane Smith',
+    fullName: 'Jane Smith',
     mobile: '8765432109',
     city: 'Delhi',
     permissions: {
       location: true,
       contacts: true
     },
-    location: {
-      lat: 28.7041,
-      lng: 77.1025
+    locationData: {
+      latitude: 28.7041,
+      longitude: 77.1025,
+      timestamp: new Date()
     },
-    contacts: [
-      { name: 'Contact 1', phone: '7654321098' },
-      { name: 'Contact 2', phone: '6543210987' }
-    ],
     bankDetails: {
       accountNumber: '0987654321',
       ifsc: 'EFGH0005678',
@@ -112,21 +112,18 @@ async function startServer() {
   
   // Create a third test user
   const testUser3 = new User({
-    name: 'Robert Johnson',
+    fullName: 'Robert Johnson',
     mobile: '7654321098',
     city: 'Bangalore',
     permissions: {
       location: true,
       contacts: true
     },
-    location: {
-      lat: 12.9716,
-      lng: 77.5946
+    locationData: {
+      latitude: 12.9716,
+      longitude: 77.5946,
+      timestamp: new Date()
     },
-    contacts: [
-      { name: 'Contact 1', phone: '6543210987' },
-      { name: 'Contact 2', phone: '5432109876' }
-    ],
     bankDetails: {
       accountNumber: '5678901234',
       ifsc: 'IJKL0009012',
@@ -165,10 +162,26 @@ async function startServer() {
   console.log('Dummy documents created successfully');
   
   const app = express();
-  app.use(cors());
+  
+  // Configure CORS
+  app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+  }));
+  
+  // Configure middleware
   app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  
+  // Serve static files
   app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
   app.use(express.static(path.join(__dirname, 'public')));
+  
+  // Test endpoint
+  app.get('/api/test', (req, res) => {
+    res.json({ success: true, message: 'API is working!' });
+  });
   
   // Routes
   app.use('/api/auth', authRoutes);
