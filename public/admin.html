@@ -91,29 +91,8 @@
     <div class="container">
         <h1 class="text-center mb-4">Finance Loan App - Admin Portal</h1>
         
-        <!-- Login Form -->
-        <div id="loginSection" class="card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0">Admin Login</h5>
-            </div>
-            <div class="card-body">
-                <form id="loginForm">
-                    <div class="mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" required>
-                        <small class="text-muted">Default: admin@example.com / admin123</small>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Login</button>
-                </form>
-            </div>
-        </div>
-
         <!-- Admin Dashboard -->
-        <div id="dashboardSection" class="hidden">
+        <div id="dashboardSection">
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Admin Panel</h5>
@@ -214,10 +193,7 @@
         const API_URL = '';
         
         // DOM Elements
-        const loginSection = document.getElementById('loginSection');
         const dashboardSection = document.getElementById('dashboardSection');
-        
-        const loginForm = document.getElementById('loginForm');
         const rejectionForm = document.getElementById('rejectionForm');
         
         const adminInfo = document.getElementById('adminInfo');
@@ -241,54 +217,13 @@
         const loanDetailsContent = document.getElementById('loanDetailsContent');
         
         // Variables
-        let currentAdmin = null;
         let allLoans = [];
         
-        // Check if admin is logged in
-        function checkAuth() {
-            const token = localStorage.getItem('adminToken');
-            if (token) {
-                // Fetch admin profile
-                fetch(`${API_URL}/admin/profile`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                })
-                .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error('Authentication failed');
-                    }
-                })
-                .then(data => {
-                    currentAdmin = data;
-                    showDashboard();
-                })
-                .catch(error => {
-                    console.error('Auth error:', error);
-                    localStorage.removeItem('adminToken');
-                    showLogin();
-                });
-            } else {
-                showLogin();
-            }
-        }
-        
-        // Show login form
-        function showLogin() {
-            loginSection.classList.remove('hidden');
-            dashboardSection.classList.add('hidden');
-        }
-        
-        // Show admin dashboard
-        function showDashboard() {
-            loginSection.classList.add('hidden');
-            dashboardSection.classList.remove('hidden');
-            
-            // Update admin info
-            adminEmail.textContent = currentAdmin.email;
-            adminRole.textContent = currentAdmin.role;
+        // Initialize admin dashboard
+        function initAdminDashboard() {
+            // Set default admin info
+            adminEmail.textContent = 'admin@example.com';
+            adminRole.textContent = 'admin';
             
             // Fetch all loans
             fetchLoans();
@@ -296,13 +231,10 @@
         
         // Fetch all loans
         function fetchLoans() {
-            const token = localStorage.getItem('adminToken');
+            // For a real app, you would use authentication
+            // But for this admin-only interface, we'll skip it
             
-            fetch(`${API_URL}/admin/loans`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
+            fetch(`${API_URL}/admin/loans`)
             .then(response => response.json())
             .then(loans => {
                 allLoans = loans;
@@ -544,13 +476,8 @@
         
         // Approve loan
         function approveLoan(loanId) {
-            const token = localStorage.getItem('adminToken');
-            
             fetch(`${API_URL}/admin/loans/${loanId}/approve`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                method: 'PUT'
             })
             .then(response => response.json())
             .then(data => {
@@ -571,13 +498,10 @@
         
         // Reject loan
         function rejectLoan(loanId, reason) {
-            const token = localStorage.getItem('adminToken');
-            
             fetch(`${API_URL}/admin/loans/${loanId}/reject`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     rejectionReason: reason
@@ -603,13 +527,8 @@
         
         // Delete loan
         function deleteLoan(loanId) {
-            const token = localStorage.getItem('adminToken');
-            
             fetch(`${API_URL}/admin/loans/${loanId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                method: 'DELETE'
             })
             .then(response => response.json())
             .then(data => {
@@ -626,48 +545,6 @@
         }
         
         // Event Listeners
-        loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            fetch(`${API_URL}/admin/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.token) {
-                    localStorage.setItem('adminToken', data.token);
-                    currentAdmin = data.admin;
-                    showDashboard();
-                } else {
-                    alert('Invalid credentials. Please try again.');
-                }
-            })
-            .catch(error => {
-                console.error('Error logging in:', error);
-                // For demo, we'll just proceed if using default credentials
-                if (email === 'admin@example.com' && password === 'admin123') {
-                    localStorage.setItem('adminToken', 'demo-admin-token');
-                    currentAdmin = {
-                        email: email,
-                        role: 'admin'
-                    };
-                    showDashboard();
-                } else {
-                    alert('Invalid credentials. Please try again.');
-                }
-            });
-        });
-        
         confirmRejectBtn.addEventListener('click', function() {
             const loanId = rejectionLoanId.value;
             const reason = rejectionReason.value;
@@ -685,14 +562,12 @@
         statusFilter.addEventListener('change', filterLoans);
         
         logoutBtn.addEventListener('click', function() {
-            localStorage.removeItem('adminToken');
-            currentAdmin = null;
-            showLogin();
+            window.location.href = 'simple-index.html';
         });
         
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            checkAuth();
+            initAdminDashboard();
         });
     </script>
 </body>
