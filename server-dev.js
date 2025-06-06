@@ -167,8 +167,18 @@ async function startServer() {
   app.use(cors({
     origin: '*',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
   }));
+  
+  // Add additional CORS headers for all responses
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+  });
   
   // Configure middleware
   app.use(express.json());
@@ -178,9 +188,17 @@ async function startServer() {
   app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
   app.use(express.static(path.join(__dirname, 'public')));
   
-  // Test endpoint
+  // Test endpoints
   app.get('/api/test', (req, res) => {
     res.json({ success: true, message: 'API is working!' });
+  });
+  
+  app.get('/health', (req, res) => {
+    res.json({ 
+      status: 'UP', 
+      timestamp: new Date().toISOString(),
+      mongodb: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
+    });
   });
   
   // Routes
@@ -193,6 +211,29 @@ async function startServer() {
     app.use(express.static(path.join(__dirname, 'client/build')));
     app.get('*', (req, res) => {
       res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+    });
+  } else {
+    // Serve the portal page as the default route
+    app.get('/', (req, res) => {
+      res.sendFile(path.join(__dirname, 'public', 'portal.html'));
+    });
+    
+    // Catch-all route for development
+    app.get('*', (req, res) => {
+      // Check if the request is for an HTML file
+      if (req.headers.accept && req.headers.accept.includes('text/html')) {
+        // Check if the file exists
+        const requestedPath = req.path.substring(1); // Remove leading slash
+        const filePath = path.join(__dirname, 'public', requestedPath);
+        
+        if (fs.existsSync(filePath)) {
+          res.sendFile(filePath);
+        } else {
+          res.sendFile(path.join(__dirname, 'public', 'portal.html'));
+        }
+      } else {
+        res.status(404).json({ success: false, message: 'API endpoint not found' });
+      }
     });
   }
   
