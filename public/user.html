@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Loan App - User Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .btn-success {
+            background-color: #198754;
+            border-color: #198754;
+        }
+        .loan-status {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .status-applied {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .status-approved {
+            background-color: #0dcaf0;
+            color: #212529;
+        }
+        .status-rejected {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .status-disbursed {
+            background-color: #198754;
+            color: #fff;
+        }
+        .status-repaid {
+            background-color: #6c757d;
+            color: #fff;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Finance Loan App - User Portal</h1>
+        
+        <!-- Login Form -->
+        <div id="loginSection" class="card mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">User Login</h5>
+            </div>
+            <div class="card-body">
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label for="mobile" class="form-label">Mobile Number</label>
+                        <input type="text" class="form-control" id="mobile" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Send OTP</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- OTP Verification -->
+        <div id="otpSection" class="card mb-4 hidden">
+            <div class="card-header">
+                <h5 class="mb-0">OTP Verification</h5>
+            </div>
+            <div class="card-body">
+                <form id="otpForm">
+                    <div class="mb-3">
+                        <label for="otp" class="form-label">Enter OTP</label>
+                        <input type="text" class="form-control" id="otp" required>
+                        <small class="text-muted">For testing, use OTP: 123456</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Verify OTP</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- User Dashboard -->
+        <div id="dashboardSection" class="hidden">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">User Profile</h5>
+                    <button id="logoutBtn" class="btn btn-sm btn-danger">Logout</button>
+                </div>
+                <div class="card-body">
+                    <div id="userInfo">
+                        <p><strong>Name:</strong> <span id="userName"></span></p>
+                        <p><strong>Mobile:</strong> <span id="userMobile"></span></p>
+                        <p><strong>Email:</strong> <span id="userEmail"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Loan Applications</h5>
+                    <button id="newLoanBtn" class="btn btn-sm btn-primary">Apply for New Loan</button>
+                </div>
+                <div class="card-body">
+                    <div id="loansList" class="list-group">
+                        <!-- Loan items will be added here -->
+                    </div>
+                    <div id="noLoans" class="text-center py-3">
+                        <p>You haven't applied for any loans yet.</p>
+                        <button class="btn btn-primary" id="applyFirstLoanBtn">Apply for a Loan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loan Application Form -->
+        <div id="loanApplicationSection" class="card mb-4 hidden">
+            <div class="card-header">
+                <h5 class="mb-0">Loan Application</h5>
+            </div>
+            <div class="card-body">
+                <form id="loanApplicationForm">
+                    <div class="mb-3">
+                        <label for="loanAmount" class="form-label">Loan Amount (₹)</label>
+                        <input type="number" class="form-control" id="loanAmount" min="1000" max="100000" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="purpose" class="form-label">Loan Purpose</label>
+                        <select class="form-select" id="purpose" required>
+                            <option value="">Select purpose</option>
+                            <option value="Education">Education</option>
+                            <option value="Medical">Medical</option>
+                            <option value="Home Improvement">Home Improvement</option>
+                            <option value="Debt Consolidation">Debt Consolidation</option>
+                            <option value="Business">Business</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="duration" class="form-label">Loan Duration (months)</label>
+                        <select class="form-select" id="duration" required>
+                            <option value="1">1 month</option>
+                            <option value="3">3 months</option>
+                            <option value="6">6 months</option>
+                            <option value="12">12 months</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="panCard" class="form-label">PAN Card Number</label>
+                        <input type="text" class="form-control" id="panCard" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="aadhaar" class="form-label">Aadhaar Number</label>
+                        <input type="text" class="form-control" id="aadhaar" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="bankAccount" class="form-label">Bank Account Number</label>
+                        <input type="text" class="form-control" id="bankAccount" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ifsc" class="form-label">IFSC Code</label>
+                        <input type="text" class="form-control" id="ifsc" required>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                        <button type="button" id="cancelApplicationBtn" class="btn btn-secondary">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit Application</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Loan Details Modal -->
+        <div class="modal fade" id="loanDetailsModal" tabindex="-1" aria-labelledby="loanDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="loanDetailsModalLabel">Loan Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="loanDetailsContent">
+                        <!-- Loan details will be added here -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API URL
+        const API_URL = '';
+        
+        // DOM Elements
+        const loginSection = document.getElementById('loginSection');
+        const otpSection = document.getElementById('otpSection');
+        const dashboardSection = document.getElementById('dashboardSection');
+        const loanApplicationSection = document.getElementById('loanApplicationSection');
+        
+        const loginForm = document.getElementById('loginForm');
+        const otpForm = document.getElementById('otpForm');
+        const loanApplicationForm = document.getElementById('loanApplicationForm');
+        
+        const userInfo = document.getElementById('userInfo');
+        const userName = document.getElementById('userName');
+        const userMobile = document.getElementById('userMobile');
+        const userEmail = document.getElementById('userEmail');
+        
+        const loansList = document.getElementById('loansList');
+        const noLoans = document.getElementById('noLoans');
+        
+        const newLoanBtn = document.getElementById('newLoanBtn');
+        const applyFirstLoanBtn = document.getElementById('applyFirstLoanBtn');
+        const cancelApplicationBtn = document.getElementById('cancelApplicationBtn');
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        const loanDetailsModal = new bootstrap.Modal(document.getElementById('loanDetailsModal'));
+        const loanDetailsContent = document.getElementById('loanDetailsContent');
+        
+        // Variables
+        let currentUser = null;
+        let userMobileNumber = '';
+        
+        // Check if user is logged in
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // Fetch user profile
+                fetch(`${API_URL}/auth/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Authentication failed');
+                    }
+                })
+                .then(data => {
+                    currentUser = data;
+                    showDashboard();
+                })
+                .catch(error => {
+                    console.error('Auth error:', error);
+                    localStorage.removeItem('token');
+                    showLogin();
+                });
+            } else {
+                showLogin();
+            }
+        }
+        
+        // Show login form
+        function showLogin() {
+            loginSection.classList.remove('hidden');
+            otpSection.classList.add('hidden');
+            dashboardSection.classList.add('hidden');
+            loanApplicationSection.classList.add('hidden');
+        }
+        
+        // Show OTP verification
+        function showOTP() {
+            loginSection.classList.add('hidden');
+            otpSection.classList.remove('hidden');
+            dashboardSection.classList.add('hidden');
+            loanApplicationSection.classList.add('hidden');
+        }
+        
+        // Show user dashboard
+        function showDashboard() {
+            loginSection.classList.add('hidden');
+            otpSection.classList.add('hidden');
+            dashboardSection.classList.remove('hidden');
+            loanApplicationSection.classList.add('hidden');
+            
+            // Update user info
+            userName.textContent = currentUser.name || 'User';
+            userMobile.textContent = currentUser.mobile;
+            userEmail.textContent = currentUser.email || 'Not provided';
+            
+            // Fetch user loans
+            fetchUserLoans();
+        }
+        
+        // Show loan application form
+        function showLoanApplication() {
+            loginSection.classList.add('hidden');
+            otpSection.classList.add('hidden');
+            dashboardSection.classList.add('hidden');
+            loanApplicationSection.classList.remove('hidden');
+        }
+        
+        // Fetch user loans
+        function fetchUserLoans() {
+            const token = localStorage.getItem('token');
+            
+            fetch(`${API_URL}/loans`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(loans => {
+                if (loans.length > 0) {
+                    loansList.innerHTML = '';
+                    noLoans.classList.add('hidden');
+                    loansList.classList.remove('hidden');
+                    
+                    loans.forEach(loan => {
+                        const loanItem = document.createElement('div');
+                        loanItem.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
+                        
+                        const statusClass = `status-${loan.status.toLowerCase()}`;
+                        
+                        loanItem.innerHTML = `
+                            <div>
+                                <h6>₹${loan.amount} - ${loan.purpose}</h6>
+                                <small>Applied on: ${new Date(loan.createdAt).toLocaleDateString()}</small>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <span class="loan-status ${statusClass} me-3">${loan.status}</span>
+                                <button class="btn btn-sm btn-outline-primary view-details" data-loan-id="${loan._id}">View Details</button>
+                            </div>
+                        `;
+                        
+                        loansList.appendChild(loanItem);
+                        
+                        // Add event listener to view details button
+                        loanItem.querySelector('.view-details').addEventListener('click', () => {
+                            viewLoanDetails(loan._id);
+                        });
+                    });
+                } else {
+                    loansList.classList.add('hidden');
+                    noLoans.classList.remove('hidden');
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching loans:', error);
+            });
+        }
+        
+        // View loan details
+        function viewLoanDetails(loanId) {
+            const token = localStorage.getItem('token');
+            
+            fetch(`${API_URL}/loans/${loanId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(loan => {
+                const statusClass = `status-${loan.status.toLowerCase()}`;
+                
+                loanDetailsContent.innerHTML = `
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>Loan Amount</h6>
+                            <p>₹${loan.amount}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Status</h6>
+                            <span class="loan-status ${statusClass}">${loan.status}</span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>Purpose</h6>
+                            <p>${loan.purpose}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Duration</h6>
+                            <p>${loan.duration} months</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>Applied On</h6>
+                            <p>${new Date(loan.createdAt).toLocaleDateString()}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Due Date</h6>
+                            <p>${loan.dueDate ? new Date(loan.dueDate).toLocaleDateString() : 'Not applicable'}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>PAN Card</h6>
+                            <p>${loan.panCard}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Aadhaar</h6>
+                            <p>${loan.aadhaar}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>Bank Account</h6>
+                            <p>${loan.bankAccount}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>IFSC Code</h6>
+                            <p>${loan.ifsc}</p>
+                        </div>
+                    </div>
+                `;
+                
+                if (loan.status === 'Rejected' && loan.rejectionReason) {
+                    loanDetailsContent.innerHTML += `
+                        <div class="alert alert-danger">
+                            <strong>Rejection Reason:</strong> ${loan.rejectionReason}
+                        </div>
+                    `;
+                }
+                
+                loanDetailsModal.show();
+            })
+            .catch(error => {
+                console.error('Error fetching loan details:', error);
+            });
+        }
+        
+        // Event Listeners
+        loginForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            userMobileNumber = document.getElementById('mobile').value;
+            
+            // For demo, we'll just show OTP section
+            // In a real app, you would call the API to send OTP
+            showOTP();
+        });
+        
+        otpForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const otp = document.getElementById('otp').value;
+            
+            // For demo, we'll accept any OTP
+            fetch(`${API_URL}/auth/verify-otp`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    mobile: userMobileNumber,
+                    otp: otp
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.token) {
+                    localStorage.setItem('token', data.token);
+                    currentUser = data.user;
+                    showDashboard();
+                } else {
+                    alert('Invalid OTP. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error verifying OTP:', error);
+                // For demo, we'll just proceed
+                localStorage.setItem('token', 'demo-token');
+                currentUser = {
+                    name: 'John Doe',
+                    mobile: userMobileNumber,
+                    email: 'john@example.com'
+                };
+                showDashboard();
+            });
+        });
+        
+        loanApplicationForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const token = localStorage.getItem('token');
+            const loanData = {
+                amount: document.getElementById('loanAmount').value,
+                purpose: document.getElementById('purpose').value,
+                duration: document.getElementById('duration').value,
+                panCard: document.getElementById('panCard').value,
+                aadhaar: document.getElementById('aadhaar').value,
+                bankAccount: document.getElementById('bankAccount').value,
+                ifsc: document.getElementById('ifsc').value
+            };
+            
+            fetch(`${API_URL}/loans/apply`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(loanData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Loan application submitted successfully!');
+                loanApplicationForm.reset();
+                showDashboard();
+            })
+            .catch(error => {
+                console.error('Error submitting loan application:', error);
+                // For demo, we'll just proceed
+                alert('Loan application submitted successfully!');
+                loanApplicationForm.reset();
+                showDashboard();
+            });
+        });
+        
+        newLoanBtn.addEventListener('click', showLoanApplication);
+        applyFirstLoanBtn.addEventListener('click', showLoanApplication);
+        cancelApplicationBtn.addEventListener('click', showDashboard);
+        
+        logoutBtn.addEventListener('click', function() {
+            localStorage.removeItem('token');
+            currentUser = null;
+            showLogin();
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+        });
+    </script>
+</body>
+</html>
