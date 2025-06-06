@@ -238,9 +238,12 @@ async function startServer() {
   }
   
   const PORT = process.env.PORT || 3000;
-  app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
-    console.log(`Server accessible at http://localhost:${PORT}`);
+  const HOST = process.env.HOST || '0.0.0.0';
+  
+  app.listen(PORT, HOST, () => {
+    console.log(`Server running on ${HOST}:${PORT}`);
+    console.log(`Server accessible at http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}`);
+    console.log(`For runtime environment, use: https://work-1-dubiqgqjwebrttye.prod-runtime.all-hands.dev:${PORT}`);
     console.log('\nDefault admin credentials:');
     console.log('Email: admin@example.com');
     console.log('Password: admin123');
