@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Loan App - Admin Portal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        .btn-success {
+            background-color: #198754;
+            border-color: #198754;
+        }
+        .loan-card {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        .loan-header {
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .loan-body {
+            padding: 15px;
+            background-color: #fff;
+        }
+        .loan-footer {
+            padding: 10px 15px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+        }
+        .status-badge {
+            font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .status-applied {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .status-approved {
+            background-color: #0dcaf0;
+            color: #212529;
+        }
+        .status-rejected {
+            background-color: #dc3545;
+            color: #fff;
+        }
+        .status-disbursed {
+            background-color: #198754;
+            color: #fff;
+        }
+        .status-repaid {
+            background-color: #6c757d;
+            color: #fff;
+        }
+        .hidden {
+            display: none;
+        }
+        .user-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Finance Loan App - Admin Portal</h1>
+        
+        <!-- Admin Dashboard -->
+        <div id="dashboardSection">
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Admin Panel</h5>
+                    <button id="logoutBtn" class="btn btn-sm btn-danger">Logout</button>
+                </div>
+                <div class="card-body">
+                    <div id="adminInfo">
+                        <p><strong>Email:</strong> <span id="adminEmail"></span></p>
+                        <p><strong>Role:</strong> <span id="adminRole"></span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Loan Applications</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <select id="cityFilter" class="form-select">
+                                <option value="all">All Cities</option>
+                                <option value="Mumbai">Mumbai</option>
+                                <option value="Delhi">Delhi</option>
+                                <option value="Bangalore">Bangalore</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <select id="statusFilter" class="form-select">
+                                <option value="all">All Statuses</option>
+                                <option value="Applied">Applied</option>
+                                <option value="Approved">Approved</option>
+                                <option value="Rejected">Rejected</option>
+                                <option value="Disbursed">Disbursed</option>
+                                <option value="Repaid">Repaid</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div id="loansList">
+                        <!-- Loan items will be added here -->
+                    </div>
+                    
+                    <div id="noLoans" class="text-center py-3 hidden">
+                        <p>No loan applications found matching the selected filters.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rejection Reason Modal -->
+        <div class="modal fade" id="rejectionModal" tabindex="-1" aria-labelledby="rejectionModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="rejectionModalLabel">Provide Rejection Reason</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="rejectionForm">
+                            <div class="mb-3">
+                                <label for="rejectionReason" class="form-label">Rejection Reason</label>
+                                <textarea class="form-control" id="rejectionReason" rows="3" required></textarea>
+                            </div>
+                            <input type="hidden" id="rejectionLoanId">
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmRejectBtn">Confirm Rejection</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loan Details Modal -->
+        <div class="modal fade" id="loanDetailsModal" tabindex="-1" aria-labelledby="loanDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="loanDetailsModalLabel">Loan Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="loanDetailsContent">
+                        <!-- Loan details will be added here -->
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API URL
+        const API_URL = '/api/admin';
+        
+        // DOM Elements
+        const dashboardSection = document.getElementById('dashboardSection');
+        const rejectionForm = document.getElementById('rejectionForm');
+        
+        const adminInfo = document.getElementById('adminInfo');
+        const adminEmail = document.getElementById('adminEmail');
+        const adminRole = document.getElementById('adminRole');
+        
+        const loansList = document.getElementById('loansList');
+        const noLoans = document.getElementById('noLoans');
+        
+        const cityFilter = document.getElementById('cityFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        
+        const logoutBtn = document.getElementById('logoutBtn');
+        
+        const rejectionModal = new bootstrap.Modal(document.getElementById('rejectionModal'));
+        const rejectionReason = document.getElementById('rejectionReason');
+        const rejectionLoanId = document.getElementById('rejectionLoanId');
+        const confirmRejectBtn = document.getElementById('confirmRejectBtn');
+        
+        const loanDetailsModal = new bootstrap.Modal(document.getElementById('loanDetailsModal'));
+        const loanDetailsContent = document.getElementById('loanDetailsContent');
+        
+        // Variables
+        let allLoans = [];
+        
+        // Initialize admin dashboard
+        function initAdminDashboard() {
+            // Set default admin info
+            adminEmail.textContent = 'admin@example.com';
+            adminRole.textContent = 'admin';
+            
+            // Fetch all loans
+            fetchLoans();
+        }
+        
+        // Fetch all loans
+        function fetchLoans() {
+            // For a real app, you would use authentication
+            // But for this admin-only interface, we'll skip it
+            
+            fetch(`${API_URL}/loans`)
+            .then(response => response.json())
+            .then(loans => {
+                allLoans = loans;
+                filterLoans();
+            })
+            .catch(error => {
+                console.error('Error fetching loans:', error);
+                // For demo, use sample data
+                allLoans = [
+                    {
+                        _id: '1',
+                        amount: 1000,
+                        status: 'Applied',
+                        createdAt: new Date().toISOString(),
+                        user: {
+                            name: 'John Doe',
+                            mobile: '9876543210',
+                            city: 'Mumbai'
+                        },
+                        panCard: 'ABCDE1234F',
+                        aadhaar: '123456789012',
+                        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+                    },
+                    {
+                        _id: '2',
+                        amount: 2000,
+                        status: 'Approved',
+                        createdAt: new Date().toISOString(),
+                        user: {
+                            name: 'Jane Smith',
+                            mobile: '8765432109',
+                            city: 'Delhi'
+                        },
+                        panCard: 'FGHIJ5678K',
+                        aadhaar: '987654321012',
+                        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString()
+                    },
+                    {
+                        _id: '3',
+                        amount: 3000,
+                        status: 'Rejected',
+                        createdAt: new Date().toISOString(),
+                        user: {
+                            name: 'Robert Johnson',
+                            mobile: '7654321098',
+                            city: 'Bangalore'
+                        },
+                        panCard: 'LMNOP9012Q',
+                        aadhaar: '567890123456',
+                        dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+                        rejectionReason: 'Insufficient documentation provided'
+                    }
+                ];
+                filterLoans();
+            });
+        }
+        
+        // Filter loans based on selected filters
+        function filterLoans() {
+            const city = cityFilter.value;
+            const status = statusFilter.value;
+            
+            let filteredLoans = allLoans;
+            
+            if (city !== 'all') {
+                filteredLoans = filteredLoans.filter(loan => loan.user.city === city);
+            }
+            
+            if (status !== 'all') {
+                filteredLoans = filteredLoans.filter(loan => loan.status === status);
+            }
+            
+            displayLoans(filteredLoans);
+        }
+        
+        // Display loans in the list
+        function displayLoans(loans) {
+            if (loans.length > 0) {
+                loansList.innerHTML = '';
+                noLoans.classList.add('hidden');
+                
+                loans.forEach(loan => {
+                    const loanCard = document.createElement('div');
+                    loanCard.className = 'loan-card';
+                    
+                    const statusClass = `status-${loan.status.toLowerCase()}`;
+                    
+                    loanCard.innerHTML = `
+                        <div class="loan-header">
+                            <div>
+                                <span class="status-badge ${statusClass}">${loan.status}</span>
+                                <span class="ms-2">₹${loan.amount}</span>
+                            </div>
+                            <div>
+                                <small>Applied on: ${new Date(loan.createdAt).toLocaleDateString()}</small>
+                            </div>
+                        </div>
+                        <div class="loan-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="d-flex">
+                                        <img src="https://via.placeholder.com/100" alt="User Photo" class="user-photo me-3">
+                                        <div>
+                                            <h5>${loan.user.name}</h5>
+                                            <p class="mb-1"><strong>Mobile:</strong> ${loan.user.mobile}</p>
+                                            <p class="mb-1"><strong>City:</strong> ${loan.user.city}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <p class="mb-1"><strong>PAN:</strong> ${loan.panCard}</p>
+                                    <p class="mb-1"><strong>Aadhaar:</strong> ${loan.aadhaar}</p>
+                                    <p class="mb-1"><strong>Due Date:</strong> ${new Date(loan.dueDate).toLocaleDateString()}</p>
+                                </div>
+                            </div>
+                            ${loan.status === 'Rejected' && loan.rejectionReason ? `
+                                <div class="mt-3">
+                                    <strong>Rejection Reason:</strong> ${loan.rejectionReason}
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="loan-footer">
+                            <div class="d-flex justify-content-end">
+                                <button class="btn btn-sm btn-outline-primary me-2 view-details" data-loan-id="${loan._id}">View Details</button>
+                                ${loan.status === 'Applied' ? `
+                                    <button class="btn btn-sm btn-success me-2 approve-loan" data-loan-id="${loan._id}">Approve</button>
+                                    <button class="btn btn-sm btn-danger me-2 reject-loan" data-loan-id="${loan._id}">Reject</button>
+                                ` : ''}
+                                <button class="btn btn-sm btn-outline-danger delete-loan" data-loan-id="${loan._id}">Delete</button>
+                            </div>
+                        </div>
+                    `;
+                    
+                    loansList.appendChild(loanCard);
+                    
+                    // Add event listeners
+                    const viewDetailsBtn = loanCard.querySelector('.view-details');
+                    viewDetailsBtn.addEventListener('click', () => {
+                        viewLoanDetails(loan._id);
+                    });
+                    
+                    if (loan.status === 'Applied') {
+                        const approveBtn = loanCard.querySelector('.approve-loan');
+                        approveBtn.addEventListener('click', () => {
+                            approveLoan(loan._id);
+                        });
+                        
+                        const rejectBtn = loanCard.querySelector('.reject-loan');
+                        rejectBtn.addEventListener('click', () => {
+                            showRejectionModal(loan._id);
+                        });
+                    }
+                    
+                    const deleteBtn = loanCard.querySelector('.delete-loan');
+                    deleteBtn.addEventListener('click', () => {
+                        deleteLoan(loan._id);
+                    });
+                });
+            } else {
+                loansList.innerHTML = '';
+                noLoans.classList.remove('hidden');
+            }
+        }
+        
+        // View loan details
+        function viewLoanDetails(loanId) {
+            const loan = allLoans.find(loan => loan._id === loanId);
+            
+            if (loan) {
+                const statusClass = `status-${loan.status.toLowerCase()}`;
+                
+                loanDetailsContent.innerHTML = `
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>Loan Amount</h6>
+                            <p>₹${loan.amount}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Status</h6>
+                            <span class="status-badge ${statusClass}">${loan.status}</span>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>Applicant Name</h6>
+                            <p>${loan.user.name}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Mobile</h6>
+                            <p>${loan.user.mobile}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>City</h6>
+                            <p>${loan.user.city}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Applied On</h6>
+                            <p>${new Date(loan.createdAt).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>PAN Card</h6>
+                            <p>${loan.panCard}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Aadhaar</h6>
+                            <p>${loan.aadhaar}</p>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>Due Date</h6>
+                            <p>${new Date(loan.dueDate).toLocaleDateString()}</p>
+                        </div>
+                    </div>
+                `;
+                
+                if (loan.status === 'Rejected' && loan.rejectionReason) {
+                    loanDetailsContent.innerHTML += `
+                        <div class="alert alert-danger">
+                            <strong>Rejection Reason:</strong> ${loan.rejectionReason}
+                        </div>
+                    `;
+                }
+                
+                loanDetailsModal.show();
+            }
+        }
+        
+        // Show rejection modal
+        function showRejectionModal(loanId) {
+            rejectionLoanId.value = loanId;
+            rejectionReason.value = '';
+            rejectionModal.show();
+        }
+        
+        // Approve loan
+        function approveLoan(loanId) {
+            fetch(`${API_URL}/loans/${loanId}/approve`, {
+                method: 'PUT'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Loan approved successfully!');
+                fetchLoans();
+            })
+            .catch(error => {
+                console.error('Error approving loan:', error);
+                // For demo, update the loan status locally
+                const loanIndex = allLoans.findIndex(loan => loan._id === loanId);
+                if (loanIndex !== -1) {
+                    allLoans[loanIndex].status = 'Approved';
+                    filterLoans();
+                }
+                alert('Loan approved successfully!');
+            });
+        }
+        
+        // Reject loan
+        function rejectLoan(loanId, reason) {
+            fetch(`${API_URL}/loans/${loanId}/reject`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    rejectionReason: reason
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Loan rejected successfully!');
+                fetchLoans();
+            })
+            .catch(error => {
+                console.error('Error rejecting loan:', error);
+                // For demo, update the loan status locally
+                const loanIndex = allLoans.findIndex(loan => loan._id === loanId);
+                if (loanIndex !== -1) {
+                    allLoans[loanIndex].status = 'Rejected';
+                    allLoans[loanIndex].rejectionReason = reason;
+                    filterLoans();
+                }
+                alert('Loan rejected successfully!');
+            });
+        }
+        
+        // Delete loan
+        function deleteLoan(loanId) {
+            fetch(`${API_URL}/loans/${loanId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert('Loan deleted successfully!');
+                fetchLoans();
+            })
+            .catch(error => {
+                console.error('Error deleting loan:', error);
+                // For demo, remove the loan locally
+                allLoans = allLoans.filter(loan => loan._id !== loanId);
+                filterLoans();
+                alert('Loan deleted successfully!');
+            });
+        }
+        
+        // Event Listeners
+        confirmRejectBtn.addEventListener('click', function() {
+            const loanId = rejectionLoanId.value;
+            const reason = rejectionReason.value;
+            
+            if (reason.trim() === '') {
+                alert('Please provide a rejection reason.');
+                return;
+            }
+            
+            rejectLoan(loanId, reason);
+            rejectionModal.hide();
+        });
+        
+        cityFilter.addEventListener('change', filterLoans);
+        statusFilter.addEventListener('change', filterLoans);
+        
+        logoutBtn.addEventListener('click', function() {
+            window.location.href = 'simple-index.html';
+        });
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initAdminDashboard();
+        });
+    </script>
+</body>
+</html>

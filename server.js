@@ -21,24 +21,15 @@ if (!process.env.JWT_SECRET) {
 }
 
 async function startServer() {
-  // Connect to MongoDB
-  const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/finance-loan-app';
+  // Create an in-memory MongoDB server
+  const mongoServer = await MongoMemoryServer.create();
+  const mongoUri = mongoServer.getUri();
   
-  try {
-    await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
-    console.log('Connected to MongoDB at', mongoUri);
-  } catch (error) {
-    console.log('Failed to connect to MongoDB, falling back to in-memory database');
-    // Create an in-memory MongoDB server as fallback
-    const mongoServer = await MongoMemoryServer.create();
-    const inMemoryUri = mongoServer.getUri();
-    
-    console.log(`MongoDB Memory Server started at ${inMemoryUri}`);
-    
-    // Connect to the in-memory database
-    await mongoose.connect(inMemoryUri, { useNewUrlParser: true, useUnifiedTopology: true });
-    console.log('Connected to in-memory MongoDB');
-  }
+  console.log(`MongoDB Memory Server started at ${mongoUri}`);
+  
+  // Connect to the in-memory database
+  await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
+  console.log('Connected to in-memory MongoDB');
   
   // Create default admin
   await Admin.createDefaultAdmin();
@@ -197,11 +188,7 @@ async function startServer() {
   app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
   app.use(express.static(path.join(__dirname, 'public')));
   
-  // Test endpoints
-  app.get('/api/test', (req, res) => {
-    res.json({ success: true, message: 'API is working!' });
-  });
-  
+  // Health check endpoint
   app.get('/health', (req, res) => {
     res.json({ 
       status: 'UP', 
@@ -210,49 +197,58 @@ async function startServer() {
     });
   });
   
-  // Routes
+  // API Routes
   app.use('/api/auth', authRoutes);
   app.use('/api/loan', loanRoutes);
   app.use('/api/admin', adminRoutes);
   
-  // Serve static files from the React app in production
-  if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, 'client/build')));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
-    });
-  } else {
-    // Serve the portal page as the default route
-    app.get('/', (req, res) => {
-      res.sendFile(path.join(__dirname, 'public', 'portal.html'));
-    });
-    
-    // Catch-all route for development
-    app.get('*', (req, res) => {
-      // Check if the request is for an HTML file
-      if (req.headers.accept && req.headers.accept.includes('text/html')) {
-        // Check if the file exists
-        const requestedPath = req.path.substring(1); // Remove leading slash
-        const filePath = path.join(__dirname, 'public', requestedPath);
-        
+  // Serve user portal as the default route
+  app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'user-only.html'));
+  });
+  
+  // Serve admin portal at /admin
+  app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin-only.html'));
+  });
+  
+  // Catch-all route for HTML requests
+  app.get('*', (req, res) => {
+    if (req.headers.accept && req.headers.accept.includes('text/html')) {
+      // Check if the file exists
+      const requestedPath = req.path.substring(1); // Remove leading slash
+      const filePath = path.join(__dirname, 'public', requestedPath);
+      
+      try {
         if (fs.existsSync(filePath)) {
           res.sendFile(filePath);
         } else {
-          res.sendFile(path.join(__dirname, 'public', 'portal.html'));
+          // If path starts with /admin, serve admin portal
+          if (req.path.startsWith('/admin')) {
+            res.sendFile(path.join(__dirname, 'public', 'admin-only.html'));
+          } else {
+            // Otherwise serve user portal
+            res.sendFile(path.join(__dirname, 'public', 'user-only.html'));
+          }
         }
-      } else {
-        res.status(404).json({ success: false, message: 'API endpoint not found' });
+      } catch (error) {
+        res.sendFile(path.join(__dirname, 'public', 'user-only.html'));
       }
-    });
-  }
+    } else {
+      res.status(404).json({ success: false, message: 'API endpoint not found' });
+    }
+  });
   
-  const PORT = process.env.PORT || 3000;
+  // Start the server
+  const PORT = process.env.PORT || 12000;
   const HOST = process.env.HOST || '0.0.0.0';
   
   app.listen(PORT, HOST, () => {
     console.log(`Server running on ${HOST}:${PORT}`);
     console.log(`Server accessible at http://${HOST === '0.0.0.0' ? 'localhost' : HOST}:${PORT}`);
-    console.log(`For runtime environment, use: https://work-1-dubiqgqjwebrttye.prod-runtime.all-hands.dev:${PORT}`);
+    console.log(`For runtime environment, use:`);
+    console.log(`- User Portal: https://work-1-dubiqgqjwebrttye.prod-runtime.all-hands.dev:${PORT}/`);
+    console.log(`- Admin Portal: https://work-1-dubiqgqjwebrttye.prod-runtime.all-hands.dev:${PORT}/admin`);
     console.log('\nDefault admin credentials:');
     console.log('Email: admin@example.com');
     console.log('Password: admin123');
@@ -261,6 +257,7 @@ async function startServer() {
   // Handle shutdown
   process.on('SIGINT', async () => {
     await mongoose.disconnect();
+    await mongoServer.stop();
     console.log('MongoDB connections closed');
     process.exit(0);
   });

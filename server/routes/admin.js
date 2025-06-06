@@ -75,7 +75,7 @@ const verifyAdminToken = (req, res, next) => {
 };
 
 // Get all loan applications
-router.get('/loans', verifyAdminToken, async (req, res) => {
+router.get('/loans', async (req, res) => {
   try {
     const { city } = req.query;
     
@@ -126,7 +126,7 @@ router.get('/loans', verifyAdminToken, async (req, res) => {
 });
 
 // Get unique cities for filtering
-router.get('/cities', verifyAdminToken, async (req, res) => {
+router.get('/cities', async (req, res) => {
   try {
     const users = await User.find().distinct('city');
     res.status(200).json({
@@ -140,7 +140,7 @@ router.get('/cities', verifyAdminToken, async (req, res) => {
 });
 
 // Approve a loan
-router.put('/loans/:id/approve', verifyAdminToken, async (req, res) => {
+router.put('/loans/:id/approve', async (req, res) => {
   try {
     const loanId = req.params.id;
     
@@ -169,7 +169,7 @@ router.put('/loans/:id/approve', verifyAdminToken, async (req, res) => {
 });
 
 // Reject a loan
-router.put('/loans/:id/reject', verifyAdminToken, async (req, res) => {
+router.put('/loans/:id/reject', async (req, res) => {
   try {
     const loanId = req.params.id;
     const { rejectionReason } = req.body;
@@ -208,7 +208,7 @@ router.put('/loans/:id/reject', verifyAdminToken, async (req, res) => {
 });
 
 // Delete a loan (soft delete)
-router.delete('/loans/:id', verifyAdminToken, async (req, res) => {
+router.delete('/loans/:id', async (req, res) => {
   try {
     const loanId = req.params.id;
     
