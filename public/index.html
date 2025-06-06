@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Loan App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        .container {
+            max-width: 960px;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        .response-container {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .nav-tabs {
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Finance Loan App API Tester</h1>
+        
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="user-tab" data-bs-toggle="tab" data-bs-target="#user" type="button" role="tab" aria-controls="user" aria-selected="true">User Interface</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button" role="tab" aria-controls="admin" aria-selected="false">Admin Interface</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="myTabContent">
+            <!-- User Interface Tab -->
+            <div class="tab-pane fade show active" id="user" role="tabpanel" aria-labelledby="user-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>User Registration</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="registerForm">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="mobile" class="form-label">Mobile Number</label>
+                                <input type="text" class="form-control" id="mobile" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="city" class="form-label">City</label>
+                                <input type="text" class="form-control" id="city" required>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="locationPermission" checked>
+                                <label class="form-check-label" for="locationPermission">Location Permission</label>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="contactsPermission" checked>
+                                <label class="form-check-label" for="contactsPermission">Contacts Permission</label>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Register</button>
+                        </form>
+                        <div class="response-container" id="registerResponse" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5>User Login (OTP Generation)</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label for="loginMobile" class="form-label">Mobile Number</label>
+                                <input type="text" class="form-control" id="loginMobile" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Send OTP</button>
+                        </form>
+                        <div class="response-container" id="loginResponse" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Verify OTP</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="otpForm">
+                            <div class="mb-3">
+                                <label for="otpMobile" class="form-label">Mobile Number</label>
+                                <input type="text" class="form-control" id="otpMobile" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="otp" class="form-label">OTP</label>
+                                <input type="text" class="form-control" id="otp" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Verify OTP</button>
+                        </form>
+                        <div class="response-container" id="otpResponse" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Get Loan Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="loanStatusForm">
+                            <div class="mb-3">
+                                <label for="userToken" class="form-label">User Token</label>
+                                <input type="text" class="form-control" id="userToken" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Get Loan Status</button>
+                        </form>
+                        <div class="response-container" id="loanStatusResponse" style="display: none;"></div>
+                        <div class="mt-3">
+                            <a href="loan-application.html" class="btn btn-success">Apply for a Loan</a>
+                            <a href="dashboard.html" class="btn btn-primary">Go to Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Admin Interface Tab -->
+            <div class="tab-pane fade" id="admin" role="tabpanel" aria-labelledby="admin-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Admin Login</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="adminLoginForm">
+                            <div class="mb-3">
+                                <label for="adminEmail" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="adminEmail" value="admin@example.com" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="adminPassword" class="form-label">Password</label>
+                                <input type="password" class="form-control" id="adminPassword" value="admin123" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </form>
+                        <div class="response-container" id="adminLoginResponse" style="display: none;"></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Get All Loans</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="adminLoansForm">
+                            <div class="mb-3">
+                                <label for="adminToken" class="form-label">Admin Token</label>
+                                <input type="text" class="form-control" id="adminToken" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="cityFilter" class="form-label">City Filter (Optional)</label>
+                                <input type="text" class="form-control" id="cityFilter">
+                            </div>
+                            <button type="submit" class="btn btn-primary">Get Loans</button>
+                        </form>
+                        <div class="response-container" id="adminLoansResponse" style="display: none;"></div>
+                        <div class="mt-3">
+                            <a href="admin-dashboard.html" class="btn btn-primary">Go to Admin Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5>Approve/Reject Loan</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="loanActionForm">
+                            <div class="mb-3">
+                                <label for="actionAdminToken" class="form-label">Admin Token</label>
+                                <input type="text" class="form-control" id="actionAdminToken" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="loanId" class="form-label">Loan ID</label>
+                                <input type="text" class="form-control" id="loanId" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="action" class="form-label">Action</label>
+                                <select class="form-select" id="action" required>
+                                    <option value="approve">Approve</option>
+                                    <option value="reject">Reject</option>
+                                </select>
+                            </div>
+                            <div class="mb-3" id="rejectionReasonContainer" style="display: none;">
+                                <label for="rejectionReason" class="form-label">Rejection Reason</label>
+                                <textarea class="form-control" id="rejectionReason" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </form>
+                        <div class="response-container" id="loanActionResponse" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = window.location.origin + '/api';
+        
+        // Show/hide rejection reason based on action selection
+        document.getElementById('action').addEventListener('change', function() {
+            const rejectionContainer = document.getElementById('rejectionReasonContainer');
+            if (this.value === 'reject') {
+                rejectionContainer.style.display = 'block';
+            } else {
+                rejectionContainer.style.display = 'none';
+            }
+        });
+
+        // User Registration
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const responseContainer = document.getElementById('registerResponse');
+            responseContainer.style.display = 'block';
+            responseContainer.textContent = 'Processing...';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: document.getElementById('name').value,
+                        mobile: document.getElementById('mobile').value,
+                        city: document.getElementById('city').value,
+                        permissions: {
+                            location: document.getElementById('locationPermission').checked,
+                            contacts: document.getElementById('contactsPermission').checked
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                responseContainer.textContent = JSON.stringify(data, null, 2);
+                
+                // Auto-fill login form if registration is successful
+                if (data.success) {
+                    document.getElementById('loginMobile').value = document.getElementById('mobile').value;
+                    document.getElementById('otpMobile').value = document.getElementById('mobile').value;
+                }
+            } catch (error) {
+                responseContainer.textContent = 'Error: ' + error.message;
+            }
+        });
+
+        // User Login (OTP Generation)
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const responseContainer = document.getElementById('loginResponse');
+            responseContainer.style.display = 'block';
+            responseContainer.textContent = 'Processing...';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mobile: document.getElementById('loginMobile').value
+                    })
+                });
+                
+                const data = await response.json();
+                responseContainer.textContent = JSON.stringify(data, null, 2);
+                
+                // Auto-fill OTP form if login is successful
+                if (data.success) {
+                    document.getElementById('otpMobile').value = document.getElementById('loginMobile').value;
+                    // Look for OTP in the response (for testing purposes)
+                    const otpMatch = responseContainer.textContent.match(/OTP sent successfully/);
+                    if (otpMatch) {
+                        alert('Check the server console for the OTP');
+                    }
+                }
+            } catch (error) {
+                responseContainer.textContent = 'Error: ' + error.message;
+            }
+        });
+
+        // Verify OTP
+        document.getElementById('otpForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const responseContainer = document.getElementById('otpResponse');
+            responseContainer.style.display = 'block';
+            responseContainer.textContent = 'Processing...';
+            
+            try {
+                const response = await fetch(`${API_URL}/auth/verify-otp`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        mobile: document.getElementById('otpMobile').value,
+                        otp: document.getElementById('otp').value
+                    })
+                });
+                
+                const data = await response.json();
+                responseContainer.textContent = JSON.stringify(data, null, 2);
+                
+                // Auto-fill token if verification is successful
+                if (data.success && data.token) {
+                    document.getElementById('userToken').value = data.token;
+                    // Store token in localStorage
+                    localStorage.setItem('userToken', data.token);
+                    localStorage.setItem('userData', JSON.stringify(data.user));
+                }
+            } catch (error) {
+                responseContainer.textContent = 'Error: ' + error.message;
+            }
+        });
+
+        // Get Loan Status
+        document.getElementById('loanStatusForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const responseContainer = document.getElementById('loanStatusResponse');
+            responseContainer.style.display = 'block';
+            responseContainer.textContent = 'Processing...';
+            
+            try {
+                const response = await fetch(`${API_URL}/loan/status`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${document.getElementById('userToken').value}`
+                    }
+                });
+                
+                const data = await response.json();
+                responseContainer.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseContainer.textContent = 'Error: ' + error.message;
+            }
+        });
+
+        // Admin Login
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const responseContainer = document.getElementById('adminLoginResponse');
+            responseContainer.style.display = 'block';
+            responseContainer.textContent = 'Processing...';
+            
+            try {
+                const response = await fetch(`${API_URL}/admin/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: document.getElementById('adminEmail').value,
+                        password: document.getElementById('adminPassword').value
+                    })
+                });
+                
+                const data = await response.json();
+                responseContainer.textContent = JSON.stringify(data, null, 2);
+                
+                // Auto-fill admin token if login is successful
+                if (data.success && data.token) {
+                    document.getElementById('adminToken').value = data.token;
+                    document.getElementById('actionAdminToken').value = data.token;
+                    // Store token in localStorage
+                    localStorage.setItem('adminToken', data.token);
+                    localStorage.setItem('adminData', JSON.stringify(data.admin));
+                }
+            } catch (error) {
+                responseContainer.textContent = 'Error: ' + error.message;
+            }
+        });
+
+        // Get All Loans (Admin)
+        document.getElementById('adminLoansForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const responseContainer = document.getElementById('adminLoansResponse');
+            responseContainer.style.display = 'block';
+            responseContainer.textContent = 'Processing...';
+            
+            try {
+                const cityFilter = document.getElementById('cityFilter').value;
+                let url = `${API_URL}/admin/loans`;
+                if (cityFilter) {
+                    url += `?city=${encodeURIComponent(cityFilter)}`;
+                }
+                
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${document.getElementById('adminToken').value}`
+                    }
+                });
+                
+                const data = await response.json();
+                responseContainer.textContent = JSON.stringify(data, null, 2);
+                
+                // If loans are found, auto-fill the first loan ID
+                if (data.success && data.loans && data.loans.length > 0) {
+                    document.getElementById('loanId').value = data.loans[0].id;
+                }
+            } catch (error) {
+                responseContainer.textContent = 'Error: ' + error.message;
+            }
+        });
+
+        // Approve/Reject Loan
+        document.getElementById('loanActionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const responseContainer = document.getElementById('loanActionResponse');
+            responseContainer.style.display = 'block';
+            responseContainer.textContent = 'Processing...';
+            
+            try {
+                const action = document.getElementById('action').value;
+                const loanId = document.getElementById('loanId').value;
+                const adminToken = document.getElementById('actionAdminToken').value;
+                
+                let url = `${API_URL}/admin/loans/${loanId}/${action}`;
+                let body = {};
+                
+                if (action === 'reject') {
+                    body.rejectionReason = document.getElementById('rejectionReason').value;
+                }
+                
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    },
+                    body: JSON.stringify(body)
+                });
+                
+                const data = await response.json();
+                responseContainer.textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                responseContainer.textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

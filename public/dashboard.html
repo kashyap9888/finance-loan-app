@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+            padding-bottom: 40px;
+        }
+        .container {
+            max-width: 960px;
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        .loan-card {
+            margin-bottom: 15px;
+        }
+        .status-badge {
+            font-size: 0.9rem;
+        }
+        .status-Applied {
+            background-color: #ffc107;
+        }
+        .status-Approved {
+            background-color: #28a745;
+        }
+        .status-Rejected {
+            background-color: #dc3545;
+        }
+        .status-Disbursed {
+            background-color: #17a2b8;
+        }
+        .status-Repaid {
+            background-color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">User Dashboard</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">User Profile</h5>
+                <div>
+                    <a href="index.html" class="btn btn-sm btn-secondary">Back to Home</a>
+                    <button id="logoutBtn" class="btn btn-sm btn-danger">Logout</button>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="profileContainer">
+                    <p class="text-center">Loading profile...</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">My Loans</h5>
+                <a href="loan-application.html" class="btn btn-sm btn-primary">Apply for New Loan</a>
+            </div>
+            <div class="card-body">
+                <div id="loansContainer">
+                    <p class="text-center">Loading loans...</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Loan Details Modal -->
+        <div class="modal fade" id="loanDetailsModal" tabindex="-1" aria-labelledby="loanDetailsModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="loanDetailsModalLabel">Loan Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="loanDetailsContainer">
+                        <p class="text-center">Loading details...</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = window.location.origin + '/api';
+        let userToken = localStorage.getItem('userToken');
+        let userData = null;
+        
+        // Check if user is logged in
+        if (!userToken) {
+            alert('Please login first');
+            window.location.href = 'index.html';
+        }
+        
+        // Logout function
+        document.getElementById('logoutBtn').addEventListener('click', function() {
+            localStorage.removeItem('userToken');
+            localStorage.removeItem('userData');
+            window.location.href = 'index.html';
+        });
+        
+        // Load user profile
+        async function loadUserProfile() {
+            try {
+                const response = await fetch(`${API_URL}/auth/profile`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    userData = data.user;
+                    localStorage.setItem('userData', JSON.stringify(userData));
+                    
+                    const profileHtml = `
+                        <div class="row">
+                            <div class="col-md-4 text-center">
+                                <img src="${userData.profilePhoto || 'https://via.placeholder.com/150'}" 
+                                     alt="Profile Photo" class="img-fluid rounded-circle mb-3" 
+                                     style="max-width: 150px;">
+                            </div>
+                            <div class="col-md-8">
+                                <h4>${userData.name}</h4>
+                                <p><strong>Mobile:</strong> ${userData.mobile}</p>
+                                <p><strong>City:</strong> ${userData.city}</p>
+                                <p><strong>Account Created:</strong> ${new Date(userData.createdAt).toLocaleDateString()}</p>
+                            </div>
+                        </div>
+                    `;
+                    
+                    document.getElementById('profileContainer').innerHTML = profileHtml;
+                } else {
+                    document.getElementById('profileContainer').innerHTML = `
+                        <div class="alert alert-danger">
+                            Failed to load profile: ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('profileContainer').innerHTML = `
+                    <div class="alert alert-danger">
+                        Error loading profile: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // Load user loans
+        async function loadUserLoans() {
+            try {
+                const response = await fetch(`${API_URL}/loan/status`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.loans.length === 0) {
+                        document.getElementById('loansContainer').innerHTML = `
+                            <div class="text-center">
+                                <p>You don't have any loans yet.</p>
+                                <a href="loan-application.html" class="btn btn-primary">Apply for a Loan</a>
+                            </div>
+                        `;
+                        return;
+                    }
+                    
+                    let loansHtml = '';
+                    
+                    data.loans.forEach(loan => {
+                        const createdDate = new Date(loan.createdAt).toLocaleDateString();
+                        const dueDate = loan.dueDate ? new Date(loan.dueDate).toLocaleDateString() : 'N/A';
+                        
+                        loansHtml += `
+                            <div class="card loan-card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <span class="badge status-${loan.status} status-badge">${loan.status}</span>
+                                        <span class="ms-2">₹${loan.amount}</span>
+                                    </div>
+                                    <small>Applied on: ${createdDate}</small>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p><strong>Due Date:</strong> ${dueDate}</p>
+                                            ${loan.repaymentAmount ? `<p><strong>Repayment Amount:</strong> ₹${loan.repaymentAmount}</p>` : ''}
+                                        </div>
+                                        <div class="col-md-6 text-end">
+                                            <button class="btn btn-sm btn-info view-details" data-loan-id="${loan.id}">
+                                                View Details
+                                            </button>
+                                            ${loan.status === 'Approved' ? 
+                                                `<button class="btn btn-sm btn-success disburse-loan" data-loan-id="${loan.id}">
+                                                    Disburse Loan
+                                                </button>` : ''}
+                                        </div>
+                                    </div>
+                                    ${loan.rejectionReason ? 
+                                        `<div class="alert alert-danger mt-2 mb-0">
+                                            <strong>Rejection Reason:</strong> ${loan.rejectionReason}
+                                        </div>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    document.getElementById('loansContainer').innerHTML = loansHtml;
+                    
+                    // Add event listeners for view details buttons
+                    document.querySelectorAll('.view-details').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const loanId = this.getAttribute('data-loan-id');
+                            viewLoanDetails(loanId);
+                        });
+                    });
+                    
+                    // Add event listeners for disburse loan buttons
+                    document.querySelectorAll('.disburse-loan').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const loanId = this.getAttribute('data-loan-id');
+                            disburseLoan(loanId);
+                        });
+                    });
+                } else {
+                    document.getElementById('loansContainer').innerHTML = `
+                        <div class="alert alert-danger">
+                            Failed to load loans: ${data.message}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                document.getElementById('loansContainer').innerHTML = `
+                    <div class="alert alert-danger">
+                        Error loading loans: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        
+        // View loan details
+        async function viewLoanDetails(loanId) {
+            try {
+                const response = await fetch(`${API_URL}/loan/details/${loanId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const loan = data.loan;
+                    const createdDate = new Date(loan.createdAt).toLocaleDateString();
+                    const dueDate = loan.dueDate ? new Date(loan.dueDate).toLocaleDateString() : 'N/A';
+                    
+                    let documentsHtml = '';
+                    if (loan.documents && loan.documents.length > 0) {
+                        documentsHtml = '<div class="mt-3"><h6>Documents:</h6><ul>';
+                        loan.documents.forEach(doc => {
+                            documentsHtml += `<li><a href="${doc}" target="_blank">View Document</a></li>`;
+                        });
+                        documentsHtml += '</ul></div>';
+                    }
+                    
+                    const detailsHtml = `
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Loan ID:</strong> ${loan.id}</p>
+                                <p><strong>Amount:</strong> ₹${loan.amount}</p>
+                                <p><strong>Status:</strong> <span class="badge status-${loan.status}">${loan.status}</span></p>
+                                <p><strong>Applied On:</strong> ${createdDate}</p>
+                                <p><strong>Due Date:</strong> ${dueDate}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Interest Rate:</strong> ${loan.interestRate || 2}%</p>
+                                <p><strong>Processing Fee:</strong> ₹${loan.processingFee || 100}</p>
+                                <p><strong>Late Payment Charges:</strong> ₹${loan.latePaymentCharges || 20}/day</p>
+                                <p><strong>Repayment Amount:</strong> ₹${loan.repaymentAmount || (loan.amount * 1.1)}</p>
+                            </div>
+                        </div>
+                        ${documentsHtml}
+                        ${loan.rejectionReason ? 
+                            `<div class="alert alert-danger mt-3">
+                                <strong>Rejection Reason:</strong> ${loan.rejectionReason}
+                            </div>` : ''}
+                    `;
+                    
+                    document.getElementById('loanDetailsContainer').innerHTML = detailsHtml;
+                    
+                    // Show the modal
+                    const modal = new bootstrap.Modal(document.getElementById('loanDetailsModal'));
+                    modal.show();
+                } else {
+                    alert(`Failed to load loan details: ${data.message}`);
+                }
+            } catch (error) {
+                alert(`Error loading loan details: ${error.message}`);
+            }
+        }
+        
+        // Disburse loan
+        async function disburseLoan(loanId) {
+            if (!confirm('Are you sure you want to disburse this loan?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_URL}/loan/disburse/${loanId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${userToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Loan disbursed successfully!');
+                    loadUserLoans(); // Refresh loans list
+                } else {
+                    alert(`Failed to disburse loan: ${data.message}`);
+                }
+            } catch (error) {
+                alert(`Error disbursing loan: ${error.message}`);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserProfile();
+            loadUserLoans();
+        });
+    </script>
+</body>
+</html>
