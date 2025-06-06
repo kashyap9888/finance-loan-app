@@ -21,15 +21,24 @@ if (!process.env.JWT_SECRET) {
 }
 
 async function startServer() {
-  // Create an in-memory MongoDB server
-  const mongoServer = await MongoMemoryServer.create();
-  const mongoUri = mongoServer.getUri();
+  // Connect to MongoDB
+  const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/finance-loan-app';
   
-  console.log(`MongoDB Memory Server started at ${mongoUri}`);
-  
-  // Connect to the in-memory database
-  await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
-  console.log('Connected to in-memory MongoDB');
+  try {
+    await mongoose.connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log('Connected to MongoDB at', mongoUri);
+  } catch (error) {
+    console.log('Failed to connect to MongoDB, falling back to in-memory database');
+    // Create an in-memory MongoDB server as fallback
+    const mongoServer = await MongoMemoryServer.create();
+    const inMemoryUri = mongoServer.getUri();
+    
+    console.log(`MongoDB Memory Server started at ${inMemoryUri}`);
+    
+    // Connect to the in-memory database
+    await mongoose.connect(inMemoryUri, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log('Connected to in-memory MongoDB');
+  }
   
   // Create default admin
   await Admin.createDefaultAdmin();
@@ -252,7 +261,6 @@ async function startServer() {
   // Handle shutdown
   process.on('SIGINT', async () => {
     await mongoose.disconnect();
-    await mongoServer.stop();
     console.log('MongoDB connections closed');
     process.exit(0);
   });

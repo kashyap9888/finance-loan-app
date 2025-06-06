@@ -3,58 +3,141 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Finance Loan App</title>
+    <title>Finance Loan App - Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            padding-top: 50px;
-            background-color: #f5f5f5;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        .btn-container {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
             display: flex;
-            gap: 20px;
-            margin-top: 30px;
+            align-items: center;
         }
-        .btn-container .btn {
-            flex: 1;
-            padding: 15px;
-            font-size: 18px;
+        .portal-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            width: 100%;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        .card-body {
+            padding: 30px;
+        }
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #212529;
+            font-size: 1.5rem;
+        }
+        .btn-primary {
+            background-color: #0d6efd;
+            border: none;
+            padding: 12px 25px;
+            font-weight: 500;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .btn-primary:hover {
+            background-color: #0b5ed7;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            border: none;
+            padding: 12px 25px;
+            font-weight: 500;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .btn-secondary:hover {
+            background-color: #5c636a;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .header h1 {
+            font-weight: 700;
+            color: #0d6efd;
+            margin-bottom: 15px;
+            font-size: 2.5rem;
+        }
+        .header p {
+            color: #6c757d;
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #0d6efd;
+        }
+        .admin-icon {
+            color: #6c757d;
+        }
+        .card-text {
+            color: #6c757d;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 50px;
+            color: #6c757d;
+        }
+        .card-img-top {
+            height: 160px;
+            object-fit: cover;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="text-center mb-4">Finance Loan App</h1>
-        <p class="lead text-center">Welcome to the Finance Loan App. Please select your role:</p>
-        
-        <div class="btn-container">
-            <a href="/user.html" class="btn btn-primary">User Portal</a>
-            <a href="/admin.html" class="btn btn-secondary">Admin Portal</a>
+    <div class="portal-container">
+        <div class="header">
+            <h1>Finance Loan App</h1>
+            <p>Quick and easy loans for your financial needs</p>
         </div>
         
-        <div class="mt-5">
-            <h4>API Health Status</h4>
-            <div id="apiStatus" class="alert alert-info">Checking API status...</div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="card-icon">👤</div>
+                        <h5 class="card-title">User Portal</h5>
+                        <p class="card-text">Apply for loans, check loan status, and manage your account. Get instant approvals and quick disbursements.</p>
+                        <a href="/user.html" class="btn btn-primary">Go to User Portal</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <div class="card-icon admin-icon">⚙️</div>
+                        <h5 class="card-title">Admin Portal</h5>
+                        <p class="card-text">For administrators only. Manage loan applications, approve or reject loans, and view user accounts.</p>
+                        <a href="/admin.html" class="btn btn-secondary">Go to Admin Portal</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2025 Finance Loan App. All rights reserved.</p>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Set status to online without checking API
-        const statusDiv = document.getElementById('apiStatus');
-        statusDiv.className = 'alert alert-success';
-        statusDiv.innerHTML = `
-            <strong>Status:</strong> Online<br>
-            <strong>Last Updated:</strong> ${new Date().toLocaleString()}
-        `;
-    </script>
 </body>
 </html>

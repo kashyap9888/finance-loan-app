@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Loan App - Static Demo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 50px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .card {
+            margin-bottom: 20px;
+        }
+        .loan-card {
+            border-left: 5px solid #007bff;
+            margin-bottom: 15px;
+        }
+        .loan-card.approved {
+            border-left-color: #28a745;
+        }
+        .loan-card.rejected {
+            border-left-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Finance Loan App - Static Demo</h1>
+        
+        <div class="alert alert-info">
+            <strong>Note:</strong> This is a static demo of the Finance Loan App. The actual application requires server-side functionality.
+        </div>
+        
+        <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="user-tab" data-bs-toggle="tab" data-bs-target="#user" type="button" role="tab" aria-controls="user" aria-selected="true">User Portal</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="admin-tab" data-bs-toggle="tab" data-bs-target="#admin" type="button" role="tab" aria-controls="admin" aria-selected="false">Admin Portal</button>
+            </li>
+        </ul>
+        
+        <div class="tab-content" id="myTabContent">
+            <!-- User Portal Tab -->
+            <div class="tab-pane fade show active" id="user" role="tabpanel" aria-labelledby="user-tab">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">User Dashboard</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Welcome, John Doe!</h6>
+                        <p>Mobile: 9876543210</p>
+                        <p>City: Mumbai</p>
+                        
+                        <h5 class="mt-4">Your Loan Applications</h5>
+                        
+                        <div class="loan-card card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="card-title">Loan #12345</h6>
+                                    <span class="badge bg-warning">Applied</span>
+                                </div>
+                                <p class="card-text">Amount: ₹10,000</p>
+                                <p class="card-text">Applied on: June 1, 2025</p>
+                                <p class="card-text">Status: Waiting for approval</p>
+                            </div>
+                        </div>
+                        
+                        <div class="loan-card approved card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="card-title">Loan #12346</h6>
+                                    <span class="badge bg-success">Approved</span>
+                                </div>
+                                <p class="card-text">Amount: ₹20,000</p>
+                                <p class="card-text">Applied on: May 15, 2025</p>
+                                <p class="card-text">Approved on: May 20, 2025</p>
+                                <p class="card-text">Due date: July 20, 2025</p>
+                            </div>
+                        </div>
+                        
+                        <div class="loan-card rejected card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="card-title">Loan #12347</h6>
+                                    <span class="badge bg-danger">Rejected</span>
+                                </div>
+                                <p class="card-text">Amount: ₹50,000</p>
+                                <p class="card-text">Applied on: April 10, 2025</p>
+                                <p class="card-text">Rejected on: April 15, 2025</p>
+                                <p class="card-text">Reason: Insufficient documentation provided</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <button class="btn btn-success">Apply for a New Loan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Admin Portal Tab -->
+            <div class="tab-pane fade" id="admin" role="tabpanel" aria-labelledby="admin-tab">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h5 class="mb-0">Admin Dashboard</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6>Welcome, Admin!</h6>
+                        
+                        <h5 class="mt-4">Loan Applications</h5>
+                        
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Search by name, mobile, or city">
+                        </div>
+                        
+                        <div class="loan-card card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="card-title">John Doe (9876543210)</h6>
+                                    <span class="badge bg-warning">Applied</span>
+                                </div>
+                                <p class="card-text">Loan #12345 | Amount: ₹10,000</p>
+                                <p class="card-text">City: Mumbai | Applied on: June 1, 2025</p>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-success">Approve</button>
+                                    <button class="btn btn-sm btn-danger">Reject</button>
+                                    <button class="btn btn-sm btn-info">View Details</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="loan-card card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="card-title">Jane Smith (8765432109)</h6>
+                                    <span class="badge bg-warning">Applied</span>
+                                </div>
+                                <p class="card-text">Loan #12348 | Amount: ₹15,000</p>
+                                <p class="card-text">City: Delhi | Applied on: June 3, 2025</p>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-success">Approve</button>
+                                    <button class="btn btn-sm btn-danger">Reject</button>
+                                    <button class="btn btn-sm btn-info">View Details</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="loan-card approved card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="card-title">Robert Johnson (7654321098)</h6>
+                                    <span class="badge bg-success">Approved</span>
+                                </div>
+                                <p class="card-text">Loan #12346 | Amount: ₹20,000</p>
+                                <p class="card-text">City: Bangalore | Applied on: May 15, 2025</p>
+                                <p class="card-text">Approved on: May 20, 2025</p>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-info">View Details</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="loan-card rejected card">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h6 class="card-title">Sarah Williams (6543210987)</h6>
+                                    <span class="badge bg-danger">Rejected</span>
+                                </div>
+                                <p class="card-text">Loan #12347 | Amount: ₹50,000</p>
+                                <p class="card-text">City: Chennai | Applied on: April 10, 2025</p>
+                                <p class="card-text">Rejected on: April 15, 2025</p>
+                                <div class="mt-2">
+                                    <button class="btn btn-sm btn-info">View Details</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
